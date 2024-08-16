@@ -1,0 +1,2 @@
+libgcov profiling error:/cslab/home/a.vargasescobar/cpts260/hw02_gates/test/test_logic.gcda:overwriting an existing profile data with a different timestamp
+PASS test/test_logic (exit status: 0)

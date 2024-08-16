@@ -1,0 +1,7 @@
+**/*.gcda
+**/*.gcno
+test/*.out
+test/*.stamp
+test/test_logic
+test/test_logic32
+lib/libgates.a

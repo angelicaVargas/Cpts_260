@@ -1,0 +1,290 @@
+GAS LISTING main.s 			page 1
+
+
+   1              	.option pic0
+   2              	
+   3              	# Set read-only data section
+   4              	.rdata
+   5              	.align 2
+   6              	
+   7              	# Output format for single row of matrix.    
+   8              	outputFormat:
+   9 0000 5B25642C 	    .asciz "[%d,%d,%d]\n"
+   9      25642C25 
+   9      645D0A00 
+  10              	
+  11              	# The first matrix
+  12              	matrixa:
+  13              	    .align 2
+  14              	    # first row
+  15 000c 00000001 	    .word 1
+  16 0010 00000002 	    .word 2
+  17 0014 00000003 	    .word 3
+  18              	    # second row
+  19 0018 00000004 	    .word 4
+  20 001c 00000005 	    .word 5
+  21 0020 00000006 	    .word 6
+  22              	    # third row
+  23 0024 00000007 	    .word 7
+  24 0028 00000008 	    .word 8
+  25 002c 00000009 	    .word 9
+  26              	
+  27              	# The second matrix
+  28              	matrixb:    
+  29              	    .align 2
+  30              	    # The first row
+  31 0030 00000001 	    .word 1
+  32 0034 00000002 	    .word 2
+  33 0038 00000003 	    .word 3
+  34              	    # The second row
+  35 003c 00000004 	    .word 4
+  36 0040 00000005 	    .word 5
+  37 0044 00000006 	    .word 6
+  38              	    # The third row
+  39 0048 00000007 	    .word 7
+  40 004c 00000008 	    .word 8
+  41 0050 00000009 	    .word 9
+  42              	
+  43              	
+  44              	# Set writable data section
+  45 0054 00000000 	.data
+  45      00000000 
+  45      00000000 
+  46              	.align 2
+  47              	
+  48              	# The third (result) matrix
+  49              	matrixc:
+  50              	    .align 2
+  51              	    # The first row
+  52 0000 00000001 	    .word 1
+  53 0004 00000002 	    .word 2
+GAS LISTING main.s 			page 2
+
+
+  54 0008 00000003 	    .word 3
+  55              	    # The second row
+  56 000c 00000004 	    .word 4
+  57 0010 00000005 	    .word 5
+  58 0014 00000006 	    .word 6
+  59              	    # The third row
+  60 0018 00000007 	    .word 7
+  61 001c 00000008 	    .word 8
+  62 0020 00000009 	    .word 9
+  63              	
+  64              	# Set the text section (code)    
+  65 0024 00000000 	.text
+  65      00000000 
+  65      00000000 
+  66              	.align 2
+  67              	
+  68              	# This is so that the operating system will "see" the "main" label
+  69              	# as the name of the first function to call.
+  70              	.global main
+  71              	
+  72              	
+  73              	# Print Matrix
+  74              	#
+  75              	# $a2 the matrix to print
+  76              	printmatrix:
+  77              	    # Function prologue used in calling conventions
+  78              	
+  79 0000 27BDFFE8 	    addiu   $sp, $sp, -24   # Allocate some space on the stack
+  80 0004 AFB00000 	    sw      $s0, 0($sp)     # Save the $s0 register
+  81 0008 AFA40004 	    sw      $a0, 4($sp)     # Save the $a0 register
+  82 000c AFA50008 	    sw      $a1, 8($sp)     # Save the $a1 register
+  83 0010 AFA6000C 	    sw      $a2, 12($sp)    # Save the $a2 register
+  84 0014 AFA70010 	    sw      $a3, 16($sp)    # Save the $a3 register
+  85 0018 AFBF0014 	    sw      $ra, 20($sp)    # Save the return address
+  86              	
+  87              	    #####################################################
+  88              	    # Put your printmatrix code here
+  89              	    #
+  90              	    # Feel free to use $s0 and $a0-$a3 they are saved
+  91              	    # and restored on the stack. If you need more you'll
+  92              	    # need to add the appropriate `sw` and `lw` in the
+  93              	    # prologue and epilogue.
+  94              	
+  95 001c 00C08025 	    move $s0, $a2           # save the first argument to $s0
+  96              	
+  97 0020 3C040000 	    la $a0, outputFormat    # load address of outputFormat into a0
+  97      24840000 
+  98              	                            # a0 has matrixc (mentioned on main) and s0 has address to matrixc 
+  99 0028 8E050000 	    lw $a1, 0($s0)          # load word 1 in s0 to a1
+ 100 002c 8E060004 	    lw $a2, 4($s0)          # load word 2 in s0 to a2
+ 101 0030 8E070008 	    lw $a3, 8($s0)          # load word 3 in s0 to a3
+ 102              	
+ 103 0034 0C000000 	    jal printf              # jump and link instruction -> saves return adress
+ 103      00000000 
+ 104              	
+ 105 003c 3C040000 	    la $a0, outputFormat    # loading address of outputFormat again or -> segmentation fault
+ 105      24840000 
+GAS LISTING main.s 			page 3
+
+
+ 106 0044 8E05000C 	    lw $a1, 12($s0)         # argument a1, gets overwritten (re-use)
+ 107 0048 8E060010 	    lw $a2, 16($s0)
+ 108 004c 8E070014 	    lw $a3, 20($s0)
+ 109              	
+ 110 0050 0C000000 	    jal printf
+ 110      00000000 
+ 111              	
+ 112 0058 3C040000 	    la $a0, outputFormat 
+ 112      24840000 
+ 113 0060 8E050018 	    lw $a1, 24($s0)
+ 114 0064 8E06001C 	    lw $a2, 28($s0)
+ 115 0068 8E070020 	    lw $a3, 32($s0)
+ 116              	
+ 117 006c 0C000000 	    jal printf
+ 117      00000000 
+ 118              	    #####################################################
+ 119              	
+ 120              	    # Function epilogue used in calling conventions
+ 121              	    # This is very much unwinding the prolog but in reverse
+ 122 0074 8FBF0014 	    lw      $ra, 20($sp)  # Restore the return address from the stack
+ 123 0078 8FA70010 	    lw      $a3, 16($sp)  # Restore the $a3 register
+ 124 007c 8FA6000C 	    lw      $a2, 12($sp)  # Restore the $a2 register
+ 125 0080 8FA50008 	    lw      $a1, 8($sp)   # Restore the $a1 register
+ 126 0084 8FA40004 	    lw      $a0, 4($sp)   # Restore the $a0 register
+ 127 0088 8FB00000 	    lw      $s0, 0($sp)   # Restore the $s0 register
+ 128              	    addiu   $sp, $sp, 24  # Restore the origin stack pointer
+ 129 008c 03E00008 	    jr      $ra           # Jump to the return address
+ 129      27BD0018 
+ 130              	
+ 131              	dotproduct:
+ 132              	    # Function prolog used in calling conventions
+ 133              	    # Don't mess with this ...
+ 134 0094 27BDFFFC 	    addiu   $sp, $sp, -4   # Allocate some space on the stack
+ 135 0098 AFBF0000 	    sw      $ra, ($sp)     # Save the return address
+ 136              	
+ 137              	    ################################################
+ 138              	    # Put your dotproduct code here
+ 139              	    #
+ 140              	    # This function does not call other functions so
+ 141              	    # nothing on the stack is saved. 
+ 142              	   
+ 143 009c 00804025 	    move $t0, $a0    # save argument in row (matrixa) to $t0
+ 144 00a0 00A04825 	    move $t1, $a1    # save argument in column (matrixb) to $t1
+ 145              	 
+ 146 00a4 8D0A0000 	    lw $t2, 0($t0)   # load first value of matrixa t0 into t2
+ 147 00a8 8D2B0000 	    lw $t3, 0($t1)   # load first value of column t1 into t3
+ 148 00ac 8D2C000C 	    lw $t4, 12($t1)  # load the second value of column t1 into t4
+ 149 00b0 8D2D0018 	    lw $t5, 24($t1)  # load the third value of column t1 into t5
+ 150 00b4 014B0019 	    mul $t3, $t2, $t3    # multiplying t3 and t2, value in now in t3
+ 150      00005812 
+ 150      00000000 
+ 150      00000000 
+ 151 00c4 014C0019 	    mul $t4, $t2, $t4    
+ 151      00006012 
+ 151      00000000 
+ 151      00000000 
+ 152 00d4 014D0019 	    mul $t5, $t2, $t5    
+GAS LISTING main.s 			page 4
+
+
+ 152      00006812 
+ 153 00dc 016C7020 	    add $t6, $t3, $t4    # adding the values t3 and t4, storing into t6
+ 154 00e0 01CD7820 	    add $t7, $t6, $t5    # adding values t5 and t6, storing into t7
+ 155              	    # found the first value of matrixc of row1 
+ 156 00e4 ACCF0000 	    sw $t7, 0($a2)       # storing the value from register t7 into memory
+ 157              	                         # save value into argument of matrixc
+ 158              	
+ 159 00e8 8D0A0004 	    lw $t2, 4($t0)   # load second value of matrixa t0 into t2
+ 160 00ec 8D2B0000 	    lw $t3, 0($t1)
+ 161 00f0 8D2C000C 	    lw $t4, 12($t1)
+ 162 00f4 8D2D0018 	    lw $t5, 24($t1)
+ 163 00f8 014B0019 	    mul $t3, $t2, $t3    
+ 163      00005812 
+ 163      00000000 
+ 163      00000000 
+ 164 0108 014C0019 	    mul $t4, $t2, $t4
+ 164      00006012 
+ 164      00000000 
+ 164      00000000 
+ 165 0118 014D0019 	    mul $t5, $t2, $t5
+ 165      00006812 
+ 166 0120 016C7020 	    add $t6, $t3, $t4 
+ 167 0124 01CD7820 	    add $t7, $t6, $t5    
+ 168              	    # found the second value of matrixc of row1
+ 169 0128 ACCF0004 	    sw $t7, 4($a2)       # storing the value from register t7 into memory
+ 170              	
+ 171 012c 8D0A0008 	    lw $t2, 8($t0)   # load third value of matrixa t0 into t2
+ 172 0130 8D2B0000 	    lw $t3, 0($t1)   
+ 173 0134 8D2C000C 	    lw $t4, 12($t1) 
+ 174 0138 8D2D0018 	    lw $t5, 24($t1)  
+ 175 013c 014B0019 	    mul $t3, $t2, $t3   
+ 175      00005812 
+ 175      00000000 
+ 175      00000000 
+ 176 014c 014C0019 	    mul $t4, $t2, $t4
+ 176      00006012 
+ 176      00000000 
+ 176      00000000 
+ 177 015c 014D0019 	    mul $t5, $t2, $t5
+ 177      00006812 
+ 178 0164 016C7020 	    add $t6, $t3, $t4   
+ 179 0168 01CD7820 	    add $t7, $t6, $t5   
+ 180              	    # found the third value of matrixc of row1
+ 181 016c ACCF0008 	    sw $t7, 8($a2)       # storing the value from register t7 into memory
+ 182              	
+ 183              	    ################################################
+ 184              	
+ 185              	    # Function epilog used in calling conventions
+ 186              	    # This is very much unwinding the prolog but in reverse
+ 187 0170 8FBF0000 	    lw      $ra, ($sp)    # Restore the return address from the stack
+ 188 0174 27BD0004 	    addiu   $sp, $sp, 4   # Restore the origin stack pointer
+ 189 0178 03E00008 	    jr      $ra           # Jump to the return address
+ 189      00000000 
+ 190              	
+ 191              	main:
+ 192              	    # use return registers as iterators
+ 193 0180 00008025 	    move  $s0, $zero # row iterator
+GAS LISTING main.s 			page 5
+
+
+ 194              	
+ 195              	    ################################################
+ 196              	    # Put your matrix multiply code here
+ 197              	    #
+ 198              	    # This is main so feel free to use whatever
+ 199              	    # registers you see fit here.
+ 200              	    ################################################
+ 201              	    # s0 is the pointer/row iterator -> use to point to digits in matrix
+ 202              	
+ 203              	# create loop that passes argument and increments by 1, to pass to dotproduct
+ 204              	loop: 
+ 205              	    # addi $t0, $t0, 1     # i ++
+ 206              	    # slti $t1, $t0, 3     # t1  = 1 if i < 3
+ 207              	    # li $v0, 0     #initialize result value 
+ 208              	    # pass a row and column as argument to dot product
+ 209 0184 3C040000 	    la $a0, matrixa        # load first value of row  matrixa 
+ 209      2484000C 
+ 210 018c 3C050000 	    la $a1, matrixb        # load first value of column matrixb
+ 211 0190 0C000025 	    jal     dotproduct     
+ 211      24A50030 
+ 212              	    
+ 213              	    # loop three times for each row & column (3x3)
+ 214              	    # exit the loop
+ 215              	
+ 216 0198 3C060000 	    la      $a2,  matrixc  # call the first argument of matrixc
+ 217 019c 0C000000 	    jal     printmatrix    # call printmatrix and print out the new matrix
+ 217      24C60000 
+ 218              	
+ 219 01a4 0C000000 	    jal   exit
+ 219      00000000 
+ 219      00000000 
+GAS LISTING main.s 			page 6
+
+
+DEFINED SYMBOLS
+              main.s:8      .rodata:0000000000000000 outputFormat
+              main.s:13     .rodata:000000000000000c matrixa
+              main.s:29     .rodata:0000000000000030 matrixb
+              main.s:50     .data:0000000000000000 matrixc
+              main.s:191    .text:0000000000000180 main
+              main.s:76     .text:0000000000000000 printmatrix
+              main.s:131    .text:0000000000000094 dotproduct
+              main.s:204    .text:0000000000000184 loop
+
+UNDEFINED SYMBOLS
+printf
+exit
